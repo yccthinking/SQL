@@ -84,10 +84,12 @@ void LRUKReplacer::RecordAccess(frame_id_t frame_id) {
   std::scoped_lock<std::mutex> lock(latch_);
 
   BUSTUB_ASSERT(frame_id >= 0 && static_cast<size_t>(frame_id) < replacer_size_, "Invalid frame id");
-
+  
+  // 记录每次页面访问的时间戳，用于计算后向 K 距离
   auto &frame = frames_[frame_id];
   frame.history_.push_back(current_timestamp_++);
 
+  // 仅保留最近 K 次访问历史，避免额外的存储开销
   if (frame.history_.size() > k_) {
     frame.history_.pop_front();
   }
@@ -108,6 +110,7 @@ void LRUKReplacer::SetEvictable(frame_id_t frame_id, bool set_evictable) {
     return;
   }
 
+  // 更新页面的可淘汰状态，并同步维护可淘汰页面数量
   frame.evictable_ = set_evictable;
   if (set_evictable) {
     ++curr_size_;
