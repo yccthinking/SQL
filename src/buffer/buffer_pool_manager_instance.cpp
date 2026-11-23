@@ -20,12 +20,14 @@ namespace bustub {
 BufferPoolManagerInstance::BufferPoolManagerInstance(size_t pool_size, DiskManager *disk_manager, size_t replacer_k,
                                                      LogManager *log_manager)
     : pool_size_(pool_size), disk_manager_(disk_manager), log_manager_(log_manager) {
-  // we allocate a consecutive memory space for the buffer pool
+  // 分配固定大小的连续内存空间，存放缓冲池页面
   pages_ = new Page[pool_size_];
+  // 使用可扩展哈希表维护页面编号与内存帧编号的映射
   page_table_ = new ExtendibleHashTable<page_id_t, frame_id_t>(bucket_size_);
+  // 使用 LRU-K 替换策略管理缓冲池中的页面
   replacer_ = new LRUKReplacer(pool_size, replacer_k);
 
-  // Initially, every page is in the free list.
+  // 初始化空闲帧链表，所有帧在创建时均未分配给页面
   for (size_t i = 0; i < pool_size_; ++i) {
     free_list_.emplace_back(static_cast<int>(i));
   }
