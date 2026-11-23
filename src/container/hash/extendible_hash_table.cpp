@@ -23,11 +23,13 @@ namespace bustub {
 
 template <typename K, typename V>
 ExtendibleHashTable<K, V>::ExtendibleHashTable(size_t bucket_size) : bucket_size_(bucket_size) {
+  // 初始化哈希目录，初始仅包含一个桶，局部深度为 0
   dir_.push_back(std::make_shared<Bucket>(bucket_size, 0));
 }
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::IndexOf(const K &key) -> size_t {
+  // 根据全局深度构造掩码，取哈希值的低位作为目录下标
   int mask = (1 << global_depth_) - 1;
   return std::hash<K>()(key) & mask;
 }
@@ -155,6 +157,7 @@ auto ExtendibleHashTable<K, V>::Bucket::Remove(const K &key) -> bool {
 
 template <typename K, typename V>
 auto ExtendibleHashTable<K, V>::Bucket::Insert(const K &key, const V &value) -> bool {
+    // 若键已存在，则更新原值；只有插入新键时才需要检查桶容量
   for (auto &item : list_) {
     if (item.first == key) {
       item.second = value;
